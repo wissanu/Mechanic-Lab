@@ -61,7 +61,7 @@ export const levels: Level[] = [
     title: 'ด่าน 1: สลิงเส้นเดียว',
     story: 'น้ำหนัก 100 kg (W = 981 N) แขวนที่จุดต่อ O และมีแรงดึงแนวนอน F = 981 N ไปทางขวา สลิงสีแดงที่ขาดหายไปต้องดึงจุด O ไปทางกำแพงซ้ายให้สมดุล ลากจุดหมุนบนกำแพง (หรือพิมพ์มุม) แล้วใส่แรงดึงให้ถูกต้อง',
     hint: 'ΣFx = 0: T cosθ = F และ ΣFy = 0: T sinθ = W  →  θ = tan⁻¹(W/F), T = √(F² + W²)',
-    beam: false, S: 95, ox: 80, oy: 565, floor: 0, yb: 0, yt: 5.7, fs: 0.07, walls: [0], joint: J, L: 0,
+    beam: false, S: 82, ox: 70, oy: 565, floor: 0, yb: 0, yt: 5.7, fs: 0.07, walls: [0], joint: J, L: 0,
     loads: [{ p: J, f: [981, 0], label: 'F = 981 N' }, { p: J, f: [0, -981], label: 'W = 981 N' }],
     slots: [{ label: 'สลิง A', at: J, wall: 0, yr: [0.4, 5.2] }],
     cableMax: 3000, rodTen: 5000, kb: 12000, hinge: 0,
@@ -70,7 +70,7 @@ export const levels: Level[] = [
     title: 'ด่าน 2: ทฤษฎีลามี',
     story: 'น้ำหนัก 500 N แขวนที่จุด O ยึดด้วยสลิงสองเส้นที่ขาดหายไป (สีแดง) มุมถูกกำหนดแล้ว: ซ้าย 40° ขวา 30° จากแนวนอน ใช้ทฤษฎีลามีหาแรงดึงของแต่ละเส้น แล้วใส่ค่าให้ถูก',
     hint: 'แตกแรง ΣFx = 0: T₁cos40° = T₂cos30° และ ΣFy = 0: T₁sin40° + T₂sin30° = 500 (หรือใช้ลามี)',
-    beam: false, S: 95, ox: 80, oy: 565, floor: 0, yb: 0, yt: 5.7, fs: 0.07, walls: [0, 5], joint: J, L: 0,
+    beam: false, S: 82, ox: 70, oy: 565, floor: 0, yb: 0, yt: 5.7, fs: 0.07, walls: [0, 5], joint: J, L: 0,
     loads: [{ p: J, f: [0, -500], label: 'W = 500 N' }],
     slots: [
       { label: 'เส้น A (ซ้าย)', at: J, wall: 0, yr: [0.4, 5.4], lock: 40 },
@@ -82,7 +82,7 @@ export const levels: Level[] = [
     title: 'ด่าน 3: จุดต่อซ้อนทับ',
     story: 'Case Study 01: มวล 65 kg (W = 637.65 N) และแรง 1,000 N ทำมุม 25° ใต้แนวนอน ชิ้นส่วนสีแดงมี 2 ชิ้น: A เลื่อนจุดหมุนบนกำแพงได้ B เป็นเหล็กแนวนอน (0°) ระวัง: สลิงรับแรง "ดัน" ไม่ได้ และทุกชิ้นส่วนทนแรงได้จำกัด',
     hint: 'ΣFy: T_A sinθ = W + P sin25°   |   ΣFx: T_A cosθ = P cos25° + C (C = แรงดันของเหล็ก B)   ลองหลายมุม ดูว่าสลิงขาดเมื่อไร',
-    beam: false, S: 95, ox: 80, oy: 565, floor: 0, yb: 0, yt: 5.7, fs: 0.07, walls: [0], joint: J, L: 0,
+    beam: false, S: 82, ox: 70, oy: 565, floor: 0, yb: 0, yt: 5.7, fs: 0.07, walls: [0], joint: J, L: 0,
     loads: [{ p: J, f: [0, -637.65], label: 'W = 637.65 N' }, { p: J, f: [906.31, -422.62], label: 'P = 1000 N (25°)' }],
     slots: [
       { label: 'ชิ้นส่วน A', at: J, wall: 0, yr: [2.7, 5.4] },
