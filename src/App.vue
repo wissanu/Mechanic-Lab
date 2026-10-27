@@ -14,6 +14,7 @@ const t = ref(0)
 const hint = ref(false)
 const svg = ref<SVGSVGElement | null>(null)
 const drag = ref(-1)
+const tab = ref<'real' | 'fbd'>('real') // ใช้เฉพาะจอมือถือ: สลับดูทีละ panel
 let raf = 0
 
 const sx = (x: number) => lv.value.ox + x * lv.value.S
@@ -86,6 +87,7 @@ function move(e: PointerEvent) {
 }
 
 function run() {
+  tab.value = 'real'
   cancelAnimationFrame(raf)
   res.value = evaluate(lv.value, ds.value)
   if (res.value.ok) done.value[li.value] = true
@@ -158,12 +160,21 @@ const msg = computed(() => {
         <button v-for="(l, i) in levels" :key="i" :class="{ on: i === li }" @click="go(i)">{{ done[i] ? '✅ ' : '' }}{{ l.title }}</button>
       </nav>
     </header>
+    <div class="tabs">
+      <button :class="{ on: tab === 'real' }" @click="tab = 'real'">🏗 ภาพจริง</button>
+      <button :class="{ on: tab === 'fbd' }" @click="tab = 'fbd'">📐 FBD</button>
+      <span class="eq" :class="res ? (res.ok ? 'ok' : 'bad') : ''">
+        <template v-if="res">{{ res.ok ? '✅ สมดุล' : '❌ ไม่ผ่าน' }}</template>
+        <template v-else-if="lv.beam">ΣM {{ live.M.toFixed(0) }}</template>
+        <template v-else>ΣFx {{ live.R[0].toFixed(0) }} · ΣFy {{ live.R[1].toFixed(0) }}</template>
+      </span>
+    </div>
     <main>
       <div class="stage">
         <!-- ครึ่งซ้าย: ภาพจริงก่อนสร้าง (การ์ตูน 2D) -->
-        <section class="pn">
+        <section class="pn" :class="{ off: tab !== 'real' }">
           <h3>🏗 ภาพจริงก่อนสร้าง <small>{{ cap[li] }}</small></h3>
-          <svg ref="svg" viewBox="0 0 560 600" @pointermove="move" @pointerup="drag = -1" @pointerleave="drag = -1">
+          <svg ref="svg" viewBox="0 0 560 600" @pointermove="move" @pointerup="drag = -1" @pointercancel="drag = -1" @pointerleave="drag = -1">
             <defs>
               <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bae6fd" /><stop offset="1" stop-color="#f0f9ff" /></linearGradient>
               <pattern id="brick" width="26" height="14" patternUnits="userSpaceOnUse"><rect width="26" height="14" fill="#c2410c" /><path d="M0 7H26M13 0V7M6 7V14M19 7V14" stroke="#7c2d12" stroke-width="1.5" /></pattern>
@@ -196,6 +207,7 @@ const msg = computed(() => {
               <g v-if="ds[i].kind && !evOf(i)"><circle v-for="p in [xy(s.at), anchors[i]]" :key="p[0]" :cx="p[0]" :cy="p[1]" r="6" fill="#e2e8f0" stroke="#1f2937" stroke-width="3" /></g>
               <!-- แหวนเลื่อนบนราง (จุดจับลาก) -->
               <g :style="{ cursor: s.lock === undefined ? 'grab' : 'not-allowed', touchAction: 'none' }" @pointerdown.prevent="s.lock === undefined && (drag = i)">
+                <circle :cx="anchors[i][0]" :cy="anchors[i][1]" r="28" fill="transparent" />
                 <rect :x="anchors[i][0] - 15" :y="anchors[i][1] - 11" width="30" height="22" rx="6" :fill="ds[i].kind ? '#2563eb' : '#dc2626'" stroke="#fff" stroke-width="3" />
                 <text :x="anchors[i][0]" :y="anchors[i][1] + 5" text-anchor="middle" font-size="13" fill="#fff">{{ s.lock === undefined ? '↕' : '🔒' }}</text>
               </g>
@@ -256,7 +268,7 @@ const msg = computed(() => {
         </section>
 
         <!-- ครึ่งขวา: Free Body Diagram ของฝั่งซ้าย -->
-        <section class="pn">
+        <section class="pn" :class="{ off: tab !== 'fbd' }">
           <h3>📐 FBD <small>{{ lv.beam ? 'คานโครงถัก (แยกชิ้นออกมา) ที่บานพับ O' : 'จุดต่อ O (แยกชิ้นออกมา)' }}</small></h3>
           <svg viewBox="0 0 560 600">
             <defs>
@@ -317,7 +329,7 @@ const msg = computed(() => {
 
 <style>
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, 'Noto Sans Thai', sans-serif; background: #e2e8f0; color: #0f172a; }
+body { -webkit-text-size-adjust: 100%; margin: 0; font-family: system-ui, 'Noto Sans Thai', sans-serif; background: #e2e8f0; color: #0f172a; }
 header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 16px; background: #0f172a; color: #fff; }
 h1 { font-size: 18px; margin: 0; }
 nav { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -351,6 +363,41 @@ input, select { width: 120px; padding: 4px 6px; font: inherit; }
 .out p { margin: 4px 0; }
 .out.ok { background: #dcfce7; color: #14532d; }
 .out.bad { background: #fee2e2; color: #7f1d1d; }
-@media (max-width: 1150px) { main { flex-direction: column; } aside { width: 100%; } }
-@media (max-width: 700px) { .stage { grid-template-columns: 1fr; } }
+.tabs { display: none; }
+input, select { min-height: 36px; }
+
+/* iPad / จอกลาง: panel คู่อยู่บน แผงควบคุมอยู่ล่างเป็น 2 คอลัมน์ */
+@media (max-width: 1150px) {
+  main { flex-direction: column; align-items: stretch; padding: 10px; }
+  aside { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; align-content: start; }
+  aside > h2, aside > p, aside > .ghost, aside > .act, aside > .out { grid-column: 1 / -1; }
+  aside > .ghost { justify-self: start; }
+  .card { margin: 6px 0; }
+  .pn svg { max-height: none; }
+  .act { position: sticky; bottom: 0; z-index: 5; background: #fff; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid #e2e8f0; }
+  .act button { flex: 1; min-height: 44px; font-size: 16px; }
+  button { min-height: 40px; }
+}
+
+/* มือถือ: ดูทีละ panel ผ่านแท็บ, แผงควบคุมเป็นคอลัมน์เดียว */
+@media (max-width: 700px) {
+  header { padding: 8px 10px; gap: 6px; }
+  h1 { font-size: 16px; }
+  nav { flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  nav button { white-space: nowrap; flex: none; }
+  .tabs { display: flex; gap: 6px; align-items: center; padding: 8px 10px 0; position: sticky; top: 0; z-index: 6; background: #e2e8f0; }
+  .tabs button { flex: 1; min-height: 44px; font-weight: 600; }
+  .eq { flex: none; font: 600 12px ui-monospace, monospace; padding: 6px 8px; border-radius: 8px; background: #fff; }
+  .eq.ok { background: #dcfce7; color: #14532d; }
+  .eq.bad { background: #fee2e2; color: #7f1d1d; }
+  .stage { grid-template-columns: 1fr; }
+  .pn.off { display: none; }
+  .pn h3 small { font-size: 11px; }
+  main { padding: 8px; }
+  aside { display: block; padding: 12px; }
+  .card { padding: 10px; }
+  input, select { width: 140px; font-size: 16px; min-height: 44px; } /* 16px กัน iOS ซูมเอง */
+  .row button { flex: 1; min-height: 44px; }
+}
+@media (hover: none) { button:active { filter: brightness(.92); } }
 </style>
